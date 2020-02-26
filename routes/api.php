@@ -14,3 +14,11 @@ use Illuminate\Http\Request;
 */
 
 Route::apiResource("/users", "Api\UserController");
+
+#region Admin
+    
+Route::group(["prefix" => "admin", "namespace" => "Api\Admin", "as" => "admin."], function() {
+    Route::apiResource("/users", "UserController");
+});
+    
+#endregion

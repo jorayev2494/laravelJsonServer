@@ -60,7 +60,6 @@ services:
             - MYSQL_ROOT_PASSWORD=laravel
         networks: 
             - laravel-json-server
-        # environment:
 
     # Redis Service
     redis:

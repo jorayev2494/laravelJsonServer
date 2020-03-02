@@ -35,7 +35,7 @@ $factory->define(User::class, function (Faker $faker) {
     return [
         'name'              => $faker->name,
         'last_name'         => $faker->lastName,
-        'avatar'            => User::DEFAULT_AVATAR,     // $faker->imageUrl(255, 255, "cats", true, "JsonServer"),
+        'avatar'            => $faker->boolean ? User::DEFAULT_AVATAR : "/storage/images/default.jpg",     // $faker->imageUrl(255, 255, "cats", true, "JsonServer"),
         'phone'             => $faker->phoneNumber,
         'email'             => $faker->unique()->safeEmail,
         'email_verified_at' => now(),

@@ -24,7 +24,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = $this->user_r->getAll();
+        // $users = $this->user_r->getAll()->sortByDesc("id")->take(250);
+        $users = $this->user_r->getAllSortByDesc("*", 100);
+
         return $this->mobileResponseApi($users, 200);
     }
 
@@ -40,17 +42,21 @@ class UserController extends Controller
 
         // For Mobile
         $data["password"] = "mobile";
-
-        // Hashing Password
-        $data = array_merge($data, 
-            [
-                "password" => bcrypt($data["password"]),
-                "avatar"   => "/storage/images/default.jpg",
-            ]
-        );
+        
+        // Save Avatar
+        $avatarPath = "start";
+        if ($request->hasFile("avatar")) {
+            $extension = $request->file("avatar")->getClientOriginalExtension();
+            $fileName = rand(1, 100) + time();
+            $avatarPath = "/storage/" . $request->file("avatar")->storeAs("/users", $fileName . "." . $extension, "public");
+        }
 
         // Create User
-        $stored = $this->user_r->create($data);
+        $stored = $this->user_r->create(array_merge($data, [
+            "password"  => bcrypt($data["password"]),
+            "avatar"    => $avatarPath,
+            "name"      => "AWdawddawd",
+        ]));
 
         return $this->mobileResponseApi($stored, 200);
     }
@@ -73,28 +79,31 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UserUpdateRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $data = $request->all();
 
         $update = $this->user_r->findById($id);
 
-        // For Mobile
-        $data["password"] = "mobile";
 
-        // Hashing Password
-        // if (array_key_exists("password", $data)) {
-            $data = array_merge(
-                $data,
-                [
-                    "password" => bcrypt($data["password"]),
-                    "avatar"   => "/storage/images/photo.jpg",
-                ]
-            );
-        // }
+        // "HHHHHHHHHeader: {$request->header}
+        \Log::info("HHHHHHHHHeader: ", [$request->hasFile('avatar') ? 'da' : 'nnn']);
+        \Log::info("Info: ", $request->all());
+
+        $avatarPath = $update->avatar;
+        if ($request->file("avatar")) {
+            unlink(public_path() . $update->avatar);
+            $extension = $request->file("avatar")->getClientOriginalExtension();
+            $fileName = rand(1, 100) + time();
+            $avatarPath = "/storage/" . $request->file("avatar")->storeAs("/users", $fileName . "." . $extension, "public");
+        }
 
         // Updating
-        $update->update($data);
+        $update->update(array_merge($data, [
+                "password"  => bcrypt("mobile"),            // Password Hashing
+                "avatar"    => $avatarPath
+            ])
+        );
 
         return $this->mobileResponseApi($update, 200);
     }
@@ -115,5 +124,48 @@ class UserController extends Controller
         $delete->delete();
 
         return $this->mobileResponseApi(null, 200);
+    }
+
+    // Mobile Images
+    public function file(Request $request)
+    {
+        $data = $request->all();
+
+        $avas = [];
+        if ($request->hasFile("avatar")) {
+
+            // $filePath = "/storage" . $request->file("avatar")->store("/one", "public");
+
+            foreach ($request->avatar as $key => $ava) {
+                $n = "/storage" . $ava->store("/ttte", "public");
+                $avas[$n] = $ava;
+            }
+        }
+
+        return $this->mobileResponseApi([$request->all(), $request->hasFile("avatar")], 200);
+
+        // dd($request->hasFile("file"), $data);
+        $filePath = "start";
+
+        // dd($data, $request->hasFile("avatar"), $request->file("avatar"));
+
+        \Log::info("HHHHHHHHHeader: {$request->header} Has Ava: " . ($request->hasFile('avatar')) ? 'DDa' : 'NneT');
+
+        try {
+            // if ($request->hasFile("avatar")) {
+                foreach($data as $k => $v)
+                    \Log::info("Key: >>, Val: {$v}");
+                $filePath = "/storage/" . $v[0]->store("/mobile", "public");
+                \Log::info(">> Fille: {$request->file}");
+            // } else {
+                // foreach($data as $k => $v)
+                    // \Log::info("Key: {$k}, Val: {$v}");
+                // $filePath = "else";
+            // }
+        } catch (\Throwable $th) {
+            $filePath = $th->getMessage();
+        }
+
+        return $this->mobileResponseApi([$filePath, $request->hasFile("avatar")], 200);
     }
 }

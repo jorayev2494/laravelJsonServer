@@ -14,6 +14,9 @@ use Illuminate\Http\Request;
 */
 
 Route::apiResource("/users", "Api\UserController");
+route::post("/users/{id}", "Api\UserController@update");
+
+Route::post("/file", "Api\UserController@file");
 
 #region Admin
     

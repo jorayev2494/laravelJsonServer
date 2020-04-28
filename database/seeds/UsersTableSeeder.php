@@ -11,7 +11,11 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(\App\Models\User::class, "admin")->create();
-        factory(\App\Models\User::class, 500)->create();
+        $randomImage = rand(1, 30);
+        factory(\App\Models\User::class, "admin")->create(["avatar" => "/storage/json_service/images/phone ({$randomImage}).jpg"]);
+
+        for ($i = 1; $i <= 30; $i++) { 
+            factory(\App\Models\User::class)->create(["avatar" => "/storage/json_service/images/phone ({$i}).jpg"]);
+        }
     }
 }

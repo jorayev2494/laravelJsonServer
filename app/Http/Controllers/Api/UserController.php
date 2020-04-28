@@ -14,7 +14,7 @@ class UserController extends Controller
     private $user_r;
 
     public function __construct(UserRepository $userRepository) {
-        $this->user_r       = $userRepository;
+        $this->user_r = $userRepository;
     }
 
     /**
@@ -24,8 +24,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        // $users = $this->user_r->getAll()->sortByDesc("id")->take(250);
-        $users = $this->user_r->getAllSortByDesc("*", 100);
+        $this->user_r->setSelect(["id", "name", "last_name", "avatar", "phone", "email"]);
+        $users = $this->user_r->getAllSortByDesc(100);
 
         return $this->mobileResponseApi($users, 200);
     }
@@ -67,10 +67,12 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function show($id)
-    // {
-        
-    // }
+    public function show($id)
+    {
+        $this->user_r->setSelect(["id", "name", "last_name", "avatar", "phone", "email"]);
+        $user = $this->user_r->findById($id);
+        return $this->mobileResponseApi($user, 200);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -85,11 +87,7 @@ class UserController extends Controller
 
         $update = $this->user_r->findById($id);
 
-
-        // "HHHHHHHHHeader: {$request->header}
-        \Log::info("HHHHHHHHHeader: ", [$request->hasFile('avatar') ? 'da' : 'nnn']);
-        \Log::info("Info: ", $request->all());
-
+        // Update Avatar
         $avatarPath = $update->avatar;
         if ($request->file("avatar")) {
             unlink(public_path() . $update->avatar);
@@ -149,7 +147,7 @@ class UserController extends Controller
 
         // dd($data, $request->hasFile("avatar"), $request->file("avatar"));
 
-        \Log::info("HHHHHHHHHeader: {$request->header} Has Ava: " . ($request->hasFile('avatar')) ? 'DDa' : 'NneT');
+        // \Log::info("HHHHHHHHHeader: {$request->header} Has Ava: " . ($request->hasFile('avatar')) ? 'DDa' : 'NneT');
 
         try {
             // if ($request->hasFile("avatar")) {
